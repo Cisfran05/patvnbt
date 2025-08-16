@@ -1,0 +1,15 @@
+echo "# aquavnbt" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Cisfran05/aquavnbt.git
+git push -u origin main
+
+GPT
+git init
+git remote add origin https://github.com/Cisfran05/aquavnbt.git
+git add .
+git commit -m "First upload"
+git branch -M main   # sets branch name to main
+git push -u origin main

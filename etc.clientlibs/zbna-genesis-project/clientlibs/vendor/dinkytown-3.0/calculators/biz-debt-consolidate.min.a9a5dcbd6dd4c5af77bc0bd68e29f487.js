@@ -1,0 +1,448 @@
+KJE.ConsolidateCalc=function(){this.INPUT_YEARS=KJE.parameters.get("INPUT_YEARS",false);
+this.MSG_ERROR2=KJE.parameters.get("MSG_ERROR2","Please enter the number of months left for installment loan");
+this.MSG_ERROR3=KJE.parameters.get("MSG_ERROR3","Please enter the number of months left for the");
+this.MSG_ERROR4=KJE.parameters.get("MSG_ERROR4","Calculated remaining payments exceeds 480 months.");
+this.MSG_ERROR5=KJE.parameters.get("MSG_ERROR5","Installment loan");
+this.MSG_ERROR6=KJE.parameters.get("MSG_ERROR6","payment must be greater than");
+this.MSG_ERROR7=KJE.parameters.get("MSG_ERROR7","Other loan payment must be greater than");
+this.MSG_ERROR8=KJE.parameters.get("MSG_ERROR8","Total debt balances must be greater than zero.");
+this.MSG_ERROR9=KJE.parameters.get("MSG_ERROR9","Total monthly payments must be greater than zero.");
+this.MSG_TEXT1=KJE.parameters.get("MSG_TEXT1","Your monthly payment changes from KJE1 to KJE2.");
+this.MSG_TEXT3=KJE.parameters.get("MSG_TEXT3","By consolidating your loans you will save KJE1.");
+this.MSG_TEXT5=KJE.parameters.get("MSG_TEXT5","By consolidating your loans you will pay KJE1.");
+this.MSG_TEXT7=KJE.parameters.get("MSG_TEXT7","This includes NEW_LOAN_TAX_SAVINGS in income tax savings.");
+this.MSG_TEXT9=KJE.parameters.get("MSG_TEXT9","This also takes into account TOTAL_CLOSING_COSTS in closing costs plus the interest you would have earned had you put your closing costs into savings (after taxes).");
+this.MSG_TEXT11=KJE.parameters.get("MSG_TEXT11","Closing costs included in loan");
+this.MSG_TEXT12=KJE.parameters.get("MSG_TEXT12","Closing costs paid up front");
+this.BIZ_CALCULATOR=KJE.parameters.get("BIZ_CALCULATOR",false);
+this.DS_BALANCE=null;
+this.cats=null;
+this.sSchedule=new KJE.Repeating()
+};
+KJE.ConsolidateCalc.prototype.clear=function(){this.AUTO_LOAN_AMOUNT_OWED=0;
+this.AUTO_LOAN_PAYMENT=0;
+this.AUTO_LOAN_MONTHS_LEFT=0;
+this.AUTO_LOAN_2_AMOUNT_OWED=0;
+this.AUTO_LOAN_2_PAYMENT=0;
+this.AUTO_LOAN_2_MONTHS_LEFT=0;
+this.BOAT_RV_LOANS_AMOUNT_OWED=0;
+this.BOAT_RV_LOANS_PAYMENT=0;
+this.BOAT_RV_LOANS_MONTHS_LEFT=0;
+this.EDUCATION_LOANS_AMOUNT_OWED=0;
+this.EDUCATION_LOANS_PAYMENT=0;
+this.EDUCATION_LOANS_MONTHS_LEFT=0;
+this.OTHER_LOANS_AMOUNT_OWED=0;
+this.OTHER_LOANS_PAYMENT=0;
+this.OTHER_LOANS_MONTHS_LEFT=0;
+this.AUTO_LOAN_RATE=0;
+this.AUTO_LOAN_2_RATE=0;
+this.BOAT_RV_LOANS_RATE=0;
+this.EDUCATION_LOANS_RATE=0;
+this.OTHER_LOANS_RATE=0;
+this.CREDIT_CARD_1_AMOUNT=0;
+this.CREDIT_CARD_1_RATE=0;
+this.CREDIT_CARD_2_AMOUNT=0;
+this.CREDIT_CARD_2_RATE=0;
+this.CREDIT_CARD_3_AMOUNT=0;
+this.CREDIT_CARD_3_RATE=0;
+this.OTHER_ACCOUNT_AMOUNT=0;
+this.OTHER_ACCOUNT_RATE=0;
+this.INTEREST_RATE=0;
+this.TERM_IN_MONTHS=0;
+this.UP_FRONT_COSTS=0;
+this.POINTS=0;
+this.RATE_EARNED_ON_SAVINGS=0;
+this.INCOME_TAX_RATE=0;
+this.LOAN_TYPE=KJE.ConsolidateCalc.LOAN_TYPE_PERSONAL;
+this.INCLUDE_CLOSING_COSTS_IN_LOAN=false;
+this.TOTAL_CREDIT_CARD_DEBT=0;
+this.TOTAL_INSTALLMENT_LOAN_DEBT=0;
+this.TOTAL_CREDIT_CARD_PAYMENT=0;
+this.TOTAL_INSTALLMENT_LOAN_PAYMENT=0
+};
+KJE.ConsolidateCalc.prototype.calculate=function(a2){var bl=KJE;
+var a8=this.AUTO_LOAN_AMOUNT_OWED;
+var a0=this.AUTO_LOAN_PAYMENT;
+var a9=this.AUTO_LOAN_MONTHS_LEFT;
+var aR=this.AUTO_LOAN_2_AMOUNT_OWED;
+var br=this.AUTO_LOAN_2_PAYMENT;
+var aS=this.AUTO_LOAN_2_MONTHS_LEFT;
+var aH=this.BOAT_RV_LOANS_AMOUNT_OWED;
+var a3=this.BOAT_RV_LOANS_PAYMENT;
+var aP=this.BOAT_RV_LOANS_MONTHS_LEFT;
+var aT=this.EDUCATION_LOANS_AMOUNT_OWED;
+var aF=this.EDUCATION_LOANS_PAYMENT;
+var aX=this.EDUCATION_LOANS_MONTHS_LEFT;
+var bi=this.OTHER_LOANS_AMOUNT_OWED;
+var a4=this.OTHER_LOANS_PAYMENT;
+var bh=this.OTHER_LOANS_MONTHS_LEFT;
+var aw=this.CREDIT_CARD_1_AMOUNT;
+var au=this.CREDIT_CARD_1_RATE;
+var ar=this.CREDIT_CARD_2_AMOUNT;
+var a6=this.CREDIT_CARD_2_RATE;
+var aV=this.CREDIT_CARD_3_AMOUNT;
+var i=this.CREDIT_CARD_3_RATE;
+var aL=this.OTHER_ACCOUNT_AMOUNT;
+var aB=this.OTHER_ACCOUNT_RATE;
+var bm=this.INTEREST_RATE;
+var az=this.TERM_IN_MONTHS;
+var bp=this.UP_FRONT_COSTS;
+var a1=this.POINTS;
+var at=this.RATE_EARNED_ON_SAVINGS;
+var ay=this.INCOME_TAX_RATE;
+var aZ=this.LOAN_TYPE;
+var bo=this.INCLUDE_CLOSING_COSTS_IN_LOAN;
+var aD=0;
+var bj=0;
+var aK=0;
+var av=0;
+var bf=0;
+var aJ=0;
+var bb=0;
+var bk="";
+if(this.INPUT_YEARS){az=az*12
+}if(a0>0||a8>0){a9=Math.ceil(KJE.PERIODS(this.AUTO_LOAN_RATE/1200,a0,a8));
+if(a9>480){throw (this.MSG_ERROR4)
+}}if(br>0||aR>0){aS=Math.ceil(KJE.PERIODS(this.AUTO_LOAN_2_RATE/1200,br,aR));
+if(aS>480){throw (this.MSG_ERROR4)
+}}if(a3>0||aH>0){aP=Math.ceil(KJE.PERIODS(this.BOAT_RV_LOANS_RATE/1200,a3,aH));
+if(aP>480){throw (this.MSG_ERROR4)
+}}if(aF>0||aT>0){aX=Math.ceil(KJE.PERIODS(this.EDUCATION_LOANS_RATE/1200,aF,aT));
+if(aX>480){throw (this.MSG_ERROR4)
+}}if(a4>0||bi>0){bh=Math.ceil(KJE.PERIODS(this.OTHER_LOANS_RATE/1200,a4,bi));
+if(bh>480){throw (this.MSG_ERROR4)
+}}if(aw>0){av=KJE.PMT(au/1200,az,aw)
+}if(ar>0){bf=KJE.PMT(a6/1200,az,ar)
+}if(aV>0){aJ=KJE.PMT(i/1200,az,aV)
+}if(aL>0){bb=KJE.PMT(aB/1200,az,aL)
+}this.TOTAL_CREDIT_CARD_DEBT=aw+ar+aV+aL;
+this.TOTAL_INSTALLMENT_LOAN_DEBT=a8+aR+aH+aT+bi;
+var aW=this.TOTAL_CREDIT_CARD_DEBT+this.TOTAL_INSTALLMENT_LOAN_DEBT;
+var aQ=av+bf+aJ+bb;
+var be=a0+br+a3+aF+a4;
+var ba=aQ+be;
+var bn=aW*a1/100;
+var n=bn+bp;
+if(bo){aK=aW+n;
+bj=0
+}else{aK=aW;
+bj=KJE.FV_AMT((at/1200)*(1-ay/100),az,n)
+}this.CURRENT_LOANS_INITIAL_PAYMENT=ba;
+var ax=0;
+var aC=av*az+bf*az+aJ*az+bb*az+a0*a9+br*aS+a3*aP+aF*aX+a4*bh;
+var aU=aC-aW;
+var aN=bl.round(KJE.PMT(bm/1200,az,aK),2);
+var aA=aN*az;
+var aq=aA-aK;
+if(aZ==KJE.ConsolidateCalc.LOAN_TYPE_HOME_EQUITY){aD=bl.round(aq*(ay/100),2)
+}else{aD=0
+}var aO=aA-aD+bj;
+var aE=KJE.getKJEReplaced(this.MSG_TEXT1,bl.dollars(ba),bl.dollars(aN));
+if(aO<aC){bk=KJE.getKJEReplaced(this.MSG_TEXT3,bl.dollars(aC-aO))
+}else{bk=KJE.getKJEReplaced(this.MSG_TEXT5,bl.dollars(aO-aC))
+}if(aZ==KJE.ConsolidateCalc.LOAN_TYPE_HOME_EQUITY){bk+=" "+this.MSG_TEXT7
+}if(!bo&&bj>0){bk+=" "+this.MSG_TEXT9
+}var bg=Math.round(az);
+var aM=0;
+if(bg>120){var a7=Math.floor(bg/12)+(bg%12==0?1:2);
+this.DS_BALANCE=KJE.FloatArray(a7);
+this.cats=KJE.FloatArray(a7)
+}else{this.DS_BALANCE=KJE.FloatArray(bg);
+this.cats=KJE.FloatArray(bg)
+}var bd=0;
+var bq=0;
+var bc=aK;
+if(a2){var aG=this.sSchedule;
+aG.clearRepeat();
+aG.addHeader(aG.sReportCol("Nbr",1),aG.sReportCol("Amount",2),aG.sReportCol("Interest",3),aG.sReportCol("Principal",4),aG.sReportCol("Balance",5));
+aG.addRepeat("&nbsp;","&nbsp;","&nbsp;","&nbsp;",""+bl.dollars(bc)+"")
+}if(bg>120){this.DS_BALANCE[0]=((bc));
+this.cats[0]="0"
+}var a5=0;
+var aI=aN;
+for(var aY=1;
+aY<=bg;
+aY++){aM=aY-1;
+if(bg>120){this.DS_BALANCE[(aM/12)+1]=((bc));
+this.cats[(aM/12)+1]=""+((aM/12)+1)
+}else{this.DS_BALANCE[aM]=((bc));
+this.cats[aM]=""+aY
+}a5=bc;
+bd=bl.round((bm/(1200))*bc,2);
+bq=aN-bd;
+bc-=bq;
+aI=aN;
+if(bc<0){aI+=bc;
+bc=0;
+bq=aI-bd
+}if(bg==aY){if(bc>0.005){aI+=bc;
+bc=0;
+bq=aI-bd
+}else{bc=0
+}}if(a2){aG.addRepeat(aY,bl.dollars(aI,2),bl.dollars(bd,2),bl.dollars(bq,2),bl.dollars(bc,2))
+}}this.AUTO_LOAN_MONTHS_LEFT=a9;
+this.AUTO_LOAN_2_MONTHS_LEFT=aS;
+this.BOAT_RV_LOANS_MONTHS_LEFT=aP;
+this.EDUCATION_LOANS_MONTHS_LEFT=aX;
+this.RESULTS_MESSAGE=aE;
+this.CURRENT_LOANS_TOTAL_INTEREST=aU;
+this.CURRENT_LOANS_TAX_SAVINGS=ax;
+this.CURRENT_LOANS_TOTAL_PAYMENTS=aC;
+this.CURRENT_LOANS_MONTHLY_PAYMENTS=ba;
+this.NEW_LOAN_INITIAL_PAYMENT=aN;
+this.NEW_LOAN_TOTAL_INTEREST=aq;
+this.NEW_LOAN_TAX_SAVINGS=aD;
+this.NEW_LOAN_TOTAL_PAYMENTS=aA;
+this.INTEREST_FROM_SAVINGS_ACCOUNT=bj;
+this.COST_OF_POINTS=bn;
+this.TOTAL_CLOSING_COSTS=n;
+this.NEW_LOAN_AMOUNT=aK;
+this.CREDIT_CARD_1_PAYMENT=av;
+this.CREDIT_CARD_2_PAYMENT=bf;
+this.CREDIT_CARD_3_PAYMENT=aJ;
+this.OTHER_ACCOUNT_PAYMENT=bb;
+this.CURRENT_LOANS_BALANCE=aW;
+this.SAVINGS_MESSAGE=bk;
+this.NEW_LOAN_NET_PAYMENTS=aO
+};
+KJE.ConsolidateCalc.prototype.formatReport=function(b){b.replace("INCLUDE_CLOSING_COSTS_IN_LOAN",this.INCLUDE_CLOSING_COSTS_IN_LOAN?this.MSG_TEXT11:this.MSG_TEXT12);
+b.replace("SAVINGS_MESSAGE",this.SAVINGS_MESSAGE);
+b.dollars("TOTAL_CREDIT_CARD_DEBT",this.TOTAL_CREDIT_CARD_DEBT);
+b.dollars("TOTAL_INSTALLMENT_LOAN_DEBT",this.TOTAL_INSTALLMENT_LOAN_DEBT);
+b.dollars("TOTAL_CREDIT_CARD_PAYMENT",this.TOTAL_CREDIT_CARD_PAYMENT);
+b.dollars("TOTAL_INSTALLMENT_LOAN_PAYMENT",this.TOTAL_INSTALLMENT_LOAN_PAYMENT);
+b.dollars("AUTO_LOAN_AMOUNT_OWED",this.AUTO_LOAN_AMOUNT_OWED);
+b.dollars("AUTO_LOAN_PAYMENT",this.AUTO_LOAN_PAYMENT);
+b.number("AUTO_LOAN_MONTHS_LEFT",this.AUTO_LOAN_MONTHS_LEFT);
+b.dollars("AUTO_LOAN_2_AMOUNT_OWED",this.AUTO_LOAN_2_AMOUNT_OWED);
+b.dollars("AUTO_LOAN_2_PAYMENT",this.AUTO_LOAN_2_PAYMENT);
+b.number("AUTO_LOAN_2_MONTHS_LEFT",this.AUTO_LOAN_2_MONTHS_LEFT);
+b.dollars("BOAT_RV_LOANS_AMOUNT_OWED",this.BOAT_RV_LOANS_AMOUNT_OWED);
+b.dollars("BOAT_RV_LOANS_PAYMENT",this.BOAT_RV_LOANS_PAYMENT);
+b.number("BOAT_RV_LOANS_MONTHS_LEFT",this.BOAT_RV_LOANS_MONTHS_LEFT);
+b.dollars("EDUCATION_LOANS_AMOUNT_OWED",this.EDUCATION_LOANS_AMOUNT_OWED);
+b.dollars("EDUCATION_LOANS_PAYMENT",this.EDUCATION_LOANS_PAYMENT);
+b.number("EDUCATION_LOANS_MONTHS_LEFT",this.EDUCATION_LOANS_MONTHS_LEFT);
+b.dollars("OTHER_LOANS_AMOUNT_OWED",this.OTHER_LOANS_AMOUNT_OWED);
+b.dollars("OTHER_LOANS_PAYMENT",this.OTHER_LOANS_PAYMENT);
+b.number("OTHER_LOANS_MONTHS_LEFT",this.OTHER_LOANS_MONTHS_LEFT);
+b.dollars("CREDIT_CARD_1_AMOUNT",this.CREDIT_CARD_1_AMOUNT);
+b.loanRate("CREDIT_CARD_1_RATE",this.CREDIT_CARD_1_RATE/100);
+b.dollars("CREDIT_CARD_2_AMOUNT",this.CREDIT_CARD_2_AMOUNT);
+b.loanRate("CREDIT_CARD_2_RATE",this.CREDIT_CARD_2_RATE/100);
+b.dollars("CREDIT_CARD_3_AMOUNT",this.CREDIT_CARD_3_AMOUNT);
+b.loanRate("CREDIT_CARD_3_RATE",this.CREDIT_CARD_3_RATE/100);
+b.dollars("OTHER_ACCOUNT_AMOUNT",this.OTHER_ACCOUNT_AMOUNT);
+b.loanRate("OTHER_ACCOUNT_RATE",this.OTHER_ACCOUNT_RATE/100);
+b.loanRate("INTEREST_RATE",this.INTEREST_RATE/100);
+b.number("TERM_IN_MONTHS",this.TERM_IN_MONTHS);
+b.dollars("UP_FRONT_COSTS",this.UP_FRONT_COSTS);
+b.returnRate("RATE_EARNED_ON_SAVINGS",this.RATE_EARNED_ON_SAVINGS/100);
+b.taxRate("INCOME_TAX_RATE",this.INCOME_TAX_RATE/100);
+b.replace("LOAN_TYPE",KJE.ConsolidateCalc.LOAN_TYPE_DESC[this.LOAN_TYPE]);
+b.replace("RESULTS_MESSAGE",this.RESULTS_MESSAGE);
+b.dollars("CURRENT_LOANS_INITIAL_PAYMENT",this.CURRENT_LOANS_INITIAL_PAYMENT);
+b.dollars("CURRENT_LOANS_TOTAL_INTEREST",this.CURRENT_LOANS_TOTAL_INTEREST);
+b.dollars("CURRENT_LOANS_TAX_SAVINGS",this.CURRENT_LOANS_TAX_SAVINGS);
+b.dollars("CURRENT_LOANS_TOTAL_PAYMENTS",this.CURRENT_LOANS_TOTAL_PAYMENTS);
+b.dollars("NEW_LOAN_INITIAL_PAYMENT",this.NEW_LOAN_INITIAL_PAYMENT);
+b.dollars("NEW_LOAN_TOTAL_INTEREST",this.NEW_LOAN_TOTAL_INTEREST);
+b.dollars("NEW_LOAN_TAX_SAVINGS",this.NEW_LOAN_TAX_SAVINGS);
+b.dollars("NEW_LOAN_TOTAL_PAYMENTS",this.NEW_LOAN_TOTAL_PAYMENTS);
+b.dollars("INTEREST_FROM_SAVINGS_ACCOUNT",this.INTEREST_FROM_SAVINGS_ACCOUNT);
+b.dollars("COST_OF_POINTS",this.COST_OF_POINTS);
+b.dollars("TOTAL_CLOSING_COSTS",this.TOTAL_CLOSING_COSTS);
+b.dollars("NEW_LOAN_AMOUNT",this.NEW_LOAN_AMOUNT);
+b.dollars("INCLUDE_CLOSING_COSTS_IN_LOAN",this.INCLUDE_CLOSING_COSTS_IN_LOAN);
+b.dollars("CREDIT_CARD_1_PAYMENT",this.CREDIT_CARD_1_PAYMENT);
+b.dollars("CREDIT_CARD_2_PAYMENT",this.CREDIT_CARD_2_PAYMENT);
+b.dollars("CREDIT_CARD_3_PAYMENT",this.CREDIT_CARD_3_PAYMENT);
+b.dollars("OTHER_ACCOUNT_PAYMENT",this.OTHER_ACCOUNT_PAYMENT);
+b.dollars("CURRENT_LOANS_MONTHLY_PAYMENTS",this.CURRENT_LOANS_MONTHLY_PAYMENTS);
+b.dollars("CURRENT_LOANS_BALANCE",this.CURRENT_LOANS_BALANCE);
+b.number("POINTS",this.POINTS,2);
+b.dollars("NEW_LOAN_NET_PAYMENTS",this.NEW_LOAN_NET_PAYMENTS);
+b.replace("**REPEATING GROUP**",this.sSchedule.getRepeat())
+};
+KJE.ConsolidateCalc.LOAN_TYPE_PERSONAL=0;
+KJE.ConsolidateCalc.LOAN_TYPE_HOME_EQUITY=1;
+KJE.ConsolidateCalc.LOAN_TYPE_ID=[KJE.ConsolidateCalc.LOAN_TYPE_PERSONAL,KJE.ConsolidateCalc.LOAN_TYPE_HOME_EQUITY];
+KJE.ConsolidateCalc.LOAN_TYPE_DESC=KJE.parameters.get("ARRAY_LOAN_TYPE",["Personal","Home equity"]);
+KJE.CalcName="Business Debt Consolidation Calculator";
+KJE.CalcType="BizConsolidate";
+KJE.CalculatorTitleTemplate="KJE1";
+KJE.parseInputs=function(c){var d=KJE.getDropBox("LOAN_TYPE",KJE.parameters.get("LOAN_TYPE",KJE.ConsolidateCalc.LOAN_TYPE_PERSONAL),KJE.ConsolidateCalc.LOAN_TYPE_ID,KJE.ConsolidateCalc.LOAN_TYPE_DESC);
+c=KJE.replace("**LOAN_TYPE**",d,c);
+return c
+};
+KJE.initialize=function(){KJE.CalcControl=new KJE.ConsolidateCalc();
+KJE.GuiControl=new KJE.Consolidate(KJE.CalcControl)
+};
+KJE.Consolidate=function(t){var x=KJE;
+var B=KJE.gLegend;
+var w=KJE.inputs.items;
+this.MSG_TEXT23=KJE.parameters.get("MSG_TEXT23","Year");
+this.MSG_TEXT24=KJE.parameters.get("MSG_TEXT24","Payment");
+this.MSG_TEXT21=KJE.parameters.get("MSG_TEXT21","Loan balance");
+KJE.InputItem.AltHelpName="LOAN_AMOUNT_OWED";
+KJE.DollarSlider("AUTO_LOAN_AMOUNT_OWED",KJE.parameters.get("MSG_LOAN_AMOUNT",(t.BIZ_CALCULATOR?"Installment loan #1":"Auto loan #1")+" balance"),0,250000,0,0,2,"bold");
+KJE.DollarSlider("AUTO_LOAN_2_AMOUNT_OWED",KJE.parameters.get("MSG_LOAN_AMOUNT",(t.BIZ_CALCULATOR?"Installment loan #2":"Auto loan #2")+" balance"),0,250000,0,0,2,"bold");
+KJE.DollarSlider("BOAT_RV_LOANS_AMOUNT_OWED",KJE.parameters.get("MSG_LOAN_AMOUNT",(t.BIZ_CALCULATOR?"Installment loan #3":"Boat RV loans")+" balance"),0,250000,0,0,2,"bold");
+KJE.DollarSlider("EDUCATION_LOANS_AMOUNT_OWED",KJE.parameters.get("MSG_LOAN_AMOUNT",(t.BIZ_CALCULATOR?"Installment loan #4":"Education loans")+" balance"),0,250000,0,0,2,"bold");
+KJE.DollarSlider("OTHER_LOANS_AMOUNT_OWED",KJE.parameters.get("MSG_LOAN_AMOUNT","Other loan balance"),0,250000,0,0,2,"bold");
+s=KJE.parameters.get("MSG_PAYMENT","Payment");
+KJE.InputItem.AltHelpName="LOAN_PAYMENT";
+KJE.DollarSlider("AUTO_LOAN_PAYMENT",s,0,100000,0,0,1);
+KJE.DollarSlider("AUTO_LOAN_2_PAYMENT",s,0,100000,0,0,1);
+KJE.DollarSlider("BOAT_RV_LOANS_PAYMENT",KJE.parameters.get("MSG_PAYMENT","Payment"),0,100000,0,0,1);
+KJE.DollarSlider("EDUCATION_LOANS_PAYMENT",s,0,100000,0,0,1);
+KJE.DollarSlider("OTHER_LOANS_PAYMENT",s,0,100000,0,0,1);
+s=KJE.parameters.get("MSG_MONTH_LEFT","Remaining payments");
+KJE.InputItem.AltHelpName="LOAN_MONTHS_LEFT";
+KJE.Label("AUTO_LOAN_MONTHS_LEFT",s);
+KJE.Label("AUTO_LOAN_2_MONTHS_LEFT",s);
+KJE.Label("BOAT_RV_LOANS_MONTHS_LEFT",s);
+KJE.Label("EDUCATION_LOANS_MONTHS_LEFT",s);
+KJE.Label("OTHER_LOANS_MONTHS_LEFT",s);
+s=KJE.parameters.get("MSG_INTEREST_RATE","Interest rate");
+KJE.InputItem.AltHelpName="LOAN_RATE";
+KJE.PercentSlider("AUTO_LOAN_RATE",s,0,36,2);
+KJE.PercentSlider("AUTO_LOAN_2_RATE",s,0,36,2);
+KJE.PercentSlider("BOAT_RV_LOANS_RATE",s,0,36,2);
+KJE.PercentSlider("EDUCATION_LOANS_RATE",s,0,36,2);
+KJE.PercentSlider("OTHER_LOANS_RATE",s,0,36,2);
+KJE.InputItem.AltHelpName="CC_BALANCE";
+KJE.DollarSlider("CREDIT_CARD_1_AMOUNT",KJE.parameters.get("MSG_CARD_AMOUNT",(t.BIZ_CALCULATOR?"Card / Line #1 balance":"Credit card #1 balance")),0,250000,0,0,2,"bold");
+KJE.DollarSlider("CREDIT_CARD_2_AMOUNT",KJE.parameters.get("MSG_CARD_AMOUNT",(t.BIZ_CALCULATOR?"Card / Line #2 balance":"Credit card #2 balance")),0,250000,0,0,2,"bold");
+KJE.DollarSlider("CREDIT_CARD_3_AMOUNT",KJE.parameters.get("MSG_CARD_AMOUNT",(t.BIZ_CALCULATOR?"Card / Line #3 balance":"Credit card #3 balance")),0,250000,0,0,2,"bold");
+KJE.DollarSlider("OTHER_ACCOUNT_AMOUNT",KJE.parameters.get("MSG_CARD_AMOUNT","Other account balance"),0,250000,0,0,2,"bold");
+KJE.InputItem.AltHelpName="CC_RATE";
+KJE.PercentSlider("CREDIT_CARD_1_RATE",s,0,36,2);
+KJE.PercentSlider("CREDIT_CARD_2_RATE",s,0,36,2);
+KJE.PercentSlider("CREDIT_CARD_3_RATE",s,0,36,2);
+KJE.PercentSlider("OTHER_ACCOUNT_RATE",s,0,36,2);
+KJE.InputItem.AltHelpName="CC_PAYMENT";
+KJE.Label("CREDIT_CARD_1_PAYMENT",KJE.parameters.get("MSG_CARD_PAYMENT","Payment"));
+KJE.Label("CREDIT_CARD_2_PAYMENT",KJE.parameters.get("MSG_CARD_PAYMENT","Payment"));
+KJE.Label("CREDIT_CARD_3_PAYMENT",KJE.parameters.get("MSG_CARD_PAYMENT","Payment"));
+KJE.Label("OTHER_ACCOUNT_PAYMENT",KJE.parameters.get("MSG_CARD_PAYMENT","Payment"));
+KJE.InputItem.AltHelpName=null;
+KJE.LoanRateSlider();
+if(t.INPUT_YEARS){KJE.NumberSlider("TERM_IN_MONTHS","Term in years",1,30,0);
+w.TERM_IN_MONTHS.setValue(Math.round(KJE.parameters.get("TERM_IN_MONTHS",60)/12),true)
+}else{KJE.NumberSlider("TERM_IN_MONTHS","Term in months",12,360,0)
+}KJE.DollarSlider("UP_FRONT_COSTS","Up front costs",0,10000);
+KJE.NumberSlider("POINTS","Points",0,6,2);
+KJE.InvestRateSlider("RATE_EARNED_ON_SAVINGS","Savings rate");
+KJE.PercentSlider("INCOME_TAX_RATE","Income tax rate",0,50,2);
+KJE.Checkbox("INCLUDE_CLOSING_COSTS_IN_LOAN","Closing costs",false,"Check here to include closing costs in loan");
+KJE.DropBoxString("LOAN_TYPE","Loan type");
+var v=KJE.gNewGraph(KJE.gLINE,"GRAPH1",true,false,KJE.colorList[1],KJE.parameters.get("MSG_GRAPH_TITLE","Consolidated Loan Balance by KJE1"));
+v._legend._iOrientation=(B.BOTTOM);
+v._legend.setVisible(false);
+v._iArea=KJE.gGraphLine.AREA_FIRST_ONLY;
+if(t.BIZ_CALCULATOR){w.POINTS.hide();
+w.INCOME_TAX_RATE.hide();
+w.LOAN_TYPE.hide()
+}var p=KJE.parameters.get("MSG_WINDOW_TITLE2",(t.BIZ_CALCULATOR?"Total credit card & line debt ":"Total credit card debt "))+KJE.Colon+" ";
+var r=KJE.parameters.get("MSG_CC_CLOSETITLE","KJE1");
+var y=function(){return p+"|"+KJE.subText(KJE.getKJEReplaced(r,x.dollars(t.TOTAL_CREDIT_CARD_DEBT)),"KJERightBold")
+};
+KJE.addDropper(new KJE.Dropper("CC",false,y,y),KJE.colorList[0]);
+var l=KJE.parameters.get("MSG_WINDOW_TITLE1","Installment Loans")+KJE.Colon+" ";
+var z=KJE.parameters.get("MSG_LOANS_CLOSETITLE","KJE1");
+var q=function(){return l+"|"+KJE.subText(KJE.getKJEReplaced(z,x.dollars(t.TOTAL_INSTALLMENT_LOAN_DEBT)),"KJERightBold")
+};
+KJE.addDropper(new KJE.Dropper("LOANS",false,q,q),KJE.colorList[0]);
+var A=KJE.parameters.get("MSG_NEW_LOAN_TITLE","Consolidated loan:");
+var u=KJE.parameters.get("MSG_NEW_LOAN_CLOSETITLE","Loan amount KJE1");
+var C=function(){return A+"|"+KJE.subText(KJE.getKJEReplaced(u,x.dollars(t.NEW_LOAN_AMOUNT)),"KJERightBold")
+};
+KJE.addDropper(new KJE.Dropper("NEW_LOAN",true,C,C),KJE.colorList[0])
+};
+KJE.Consolidate.prototype.setValues=function(c){var d=KJE.inputs.items;
+c.AUTO_LOAN_AMOUNT_OWED=d.AUTO_LOAN_AMOUNT_OWED.getValue();
+c.AUTO_LOAN_PAYMENT=d.AUTO_LOAN_PAYMENT.getValue();
+c.AUTO_LOAN_RATE=d.AUTO_LOAN_RATE.getValue();
+c.AUTO_LOAN_2_AMOUNT_OWED=d.AUTO_LOAN_2_AMOUNT_OWED.getValue();
+c.AUTO_LOAN_2_PAYMENT=d.AUTO_LOAN_2_PAYMENT.getValue();
+c.AUTO_LOAN_2_RATE=d.AUTO_LOAN_2_RATE.getValue();
+c.BOAT_RV_LOANS_AMOUNT_OWED=d.BOAT_RV_LOANS_AMOUNT_OWED.getValue();
+c.BOAT_RV_LOANS_PAYMENT=d.BOAT_RV_LOANS_PAYMENT.getValue();
+c.BOAT_RV_LOANS_RATE=d.BOAT_RV_LOANS_RATE.getValue();
+c.EDUCATION_LOANS_AMOUNT_OWED=d.EDUCATION_LOANS_AMOUNT_OWED.getValue();
+c.EDUCATION_LOANS_PAYMENT=d.EDUCATION_LOANS_PAYMENT.getValue();
+c.EDUCATION_LOANS_RATE=d.EDUCATION_LOANS_RATE.getValue();
+c.OTHER_LOANS_AMOUNT_OWED=d.OTHER_LOANS_AMOUNT_OWED.getValue();
+c.OTHER_LOANS_PAYMENT=d.OTHER_LOANS_PAYMENT.getValue();
+c.OTHER_LOANS_RATE=d.OTHER_LOANS_RATE.getValue();
+c.CREDIT_CARD_1_AMOUNT=d.CREDIT_CARD_1_AMOUNT.getValue();
+c.CREDIT_CARD_1_RATE=d.CREDIT_CARD_1_RATE.getValue();
+c.CREDIT_CARD_2_AMOUNT=d.CREDIT_CARD_2_AMOUNT.getValue();
+c.CREDIT_CARD_2_RATE=d.CREDIT_CARD_2_RATE.getValue();
+c.CREDIT_CARD_3_AMOUNT=d.CREDIT_CARD_3_AMOUNT.getValue();
+c.CREDIT_CARD_3_RATE=d.CREDIT_CARD_3_RATE.getValue();
+c.OTHER_ACCOUNT_AMOUNT=d.OTHER_ACCOUNT_AMOUNT.getValue();
+c.OTHER_ACCOUNT_RATE=d.OTHER_ACCOUNT_RATE.getValue();
+c.INTEREST_RATE=d.INTEREST_RATE.getValue();
+c.TERM_IN_MONTHS=d.TERM_IN_MONTHS.getValue();
+c.UP_FRONT_COSTS=d.UP_FRONT_COSTS.getValue();
+c.POINTS=d.POINTS.getValue();
+c.RATE_EARNED_ON_SAVINGS=d.RATE_EARNED_ON_SAVINGS.getValue();
+c.INCOME_TAX_RATE=d.INCOME_TAX_RATE.getValue();
+c.LOAN_TYPE=d.LOAN_TYPE.getValue();
+c.INCLUDE_CLOSING_COSTS_IN_LOAN=d.INCLUDE_CLOSING_COSTS_IN_LOAN.getValue()
+};
+KJE.Consolidate.prototype.refresh=function(g){var e=KJE.inputs.items;
+var f=KJE.gGraphs[0];
+KJE.setTitleTemplate(g.RESULTS_MESSAGE);
+var h=g.TERM_IN_MONTHS>120?this.MSG_TEXT23:this.MSG_TEXT24;
+f.removeAll();
+f.setGraphCategories(g.cats);
+f.add(new KJE.gGraphDataSeries(g.DS_BALANCE,this.MSG_TEXT21+" "+h,f.getColor(1)));
+f.setTitleTemplate(h);
+f.paint();
+e.CREDIT_CARD_1_PAYMENT.setText(KJE.dollars(g.CREDIT_CARD_1_PAYMENT));
+e.CREDIT_CARD_2_PAYMENT.setText(KJE.dollars(g.CREDIT_CARD_2_PAYMENT));
+e.CREDIT_CARD_3_PAYMENT.setText(KJE.dollars(g.CREDIT_CARD_3_PAYMENT));
+e.AUTO_LOAN_MONTHS_LEFT.setText(KJE.number(g.AUTO_LOAN_MONTHS_LEFT),true);
+e.AUTO_LOAN_2_MONTHS_LEFT.setText(KJE.number(g.AUTO_LOAN_2_MONTHS_LEFT),true);
+e.BOAT_RV_LOANS_MONTHS_LEFT.setText(KJE.number(g.BOAT_RV_LOANS_MONTHS_LEFT),true);
+e.EDUCATION_LOANS_MONTHS_LEFT.setText(KJE.number(g.EDUCATION_LOANS_MONTHS_LEFT),true);
+e.OTHER_LOANS_MONTHS_LEFT.setText(KJE.number(g.OTHER_LOANS_MONTHS_LEFT),true)
+};
+KJE.InputScreenText=" <div id=KJE-D-CC><div id=KJE-P-CC>Input information:</div></div> <div id=KJE-E-CC > <div id='KJE-C-CREDIT_CARD_1_AMOUNT'><input id='KJE-CREDIT_CARD_1_AMOUNT' /></div> <div id='KJE-C-CREDIT_CARD_1_RATE'><input id='KJE-CREDIT_CARD_1_RATE' /></div> <div id='KJE-C-CREDIT_CARD_1_PAYMENT'><div id='KJE-CREDIT_CARD_1_PAYMENT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-CREDIT_CARD_2_AMOUNT'><input id='KJE-CREDIT_CARD_2_AMOUNT' /></div> <div id='KJE-C-CREDIT_CARD_2_RATE'><input id='KJE-CREDIT_CARD_2_RATE' /></div> <div id='KJE-C-CREDIT_CARD_2_PAYMENT'><div id='KJE-CREDIT_CARD_2_PAYMENT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-CREDIT_CARD_3_AMOUNT'><input id='KJE-CREDIT_CARD_3_AMOUNT' /></div> <div id='KJE-C-CREDIT_CARD_3_RATE'><input id='KJE-CREDIT_CARD_3_RATE' /></div> <div id='KJE-C-CREDIT_CARD_3_PAYMENT'><div id='KJE-CREDIT_CARD_3_PAYMENT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-OTHER_ACCOUNT_AMOUNT'><input id='KJE-OTHER_ACCOUNT_AMOUNT' /></div> <div id='KJE-C-OTHER_ACCOUNT_RATE'><input id='KJE-OTHER_ACCOUNT_RATE' /></div> <div id='KJE-C-OTHER_ACCOUNT_PAYMENT'><div id='KJE-OTHER_ACCOUNT_PAYMENT'></div></div> </div> <div id=KJE-D-LOANS><div id=KJE-P-LOANS>Input information:</div></div> <div id=KJE-E-LOANS > <div id='KJE-C-AUTO_LOAN_AMOUNT_OWED'><input id='KJE-AUTO_LOAN_AMOUNT_OWED' /></div> <div id='KJE-C-AUTO_LOAN_RATE'><input id='KJE-AUTO_LOAN_RATE' /></div> <div id='KJE-C-AUTO_LOAN_PAYMENT'><input id='KJE-AUTO_LOAN_PAYMENT' /></div> <div id='KJE-C-AUTO_LOAN_MONTHS_LEFT'><div id='KJE-AUTO_LOAN_MONTHS_LEFT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-AUTO_LOAN_2_AMOUNT_OWED'><input id='KJE-AUTO_LOAN_2_AMOUNT_OWED' /></div> <div id='KJE-C-AUTO_LOAN_2_RATE'><input id='KJE-AUTO_LOAN_2_RATE' /></div> <div id='KJE-C-AUTO_LOAN_2_PAYMENT'><input id='KJE-AUTO_LOAN_2_PAYMENT' /></div> <div id='KJE-C-AUTO_LOAN_2_MONTHS_LEFT'><div id='KJE-AUTO_LOAN_2_MONTHS_LEFT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-BOAT_RV_LOANS_AMOUNT_OWED'><input id='KJE-BOAT_RV_LOANS_AMOUNT_OWED' /></div> <div id='KJE-C-BOAT_RV_LOANS_RATE'><input id='KJE-BOAT_RV_LOANS_RATE' /></div> <div id='KJE-C-BOAT_RV_LOANS_PAYMENT'><input id='KJE-BOAT_RV_LOANS_PAYMENT' /></div> <div id='KJE-C-BOAT_RV_LOANS_MONTHS_LEFT'><div id='KJE-BOAT_RV_LOANS_MONTHS_LEFT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-EDUCATION_LOANS_AMOUNT_OWED'><input id='KJE-EDUCATION_LOANS_AMOUNT_OWED' /></div> <div id='KJE-C-EDUCATION_LOANS_RATE'><input id='KJE-EDUCATION_LOANS_RATE' /></div> <div id='KJE-C-EDUCATION_LOANS_PAYMENT'><input id='KJE-EDUCATION_LOANS_PAYMENT' /></div> <div id='KJE-C-EDUCATION_LOANS_MONTHS_LEFT'><div id='KJE-EDUCATION_LOANS_MONTHS_LEFT'></div></div> <hr class=KJEDivide /> <div id='KJE-C-OTHER_LOANS_AMOUNT_OWED'><input id='KJE-OTHER_LOANS_AMOUNT_OWED' /></div> <div id='KJE-C-OTHER_LOANS_RATE'><input id='KJE-OTHER_LOANS_RATE' /></div> <div id='KJE-C-OTHER_LOANS_PAYMENT'><input id='KJE-OTHER_LOANS_PAYMENT' /></div> <div id='KJE-C-OTHER_LOANS_MONTHS_LEFT'><div id='KJE-OTHER_LOANS_MONTHS_LEFT'></div></div> <div class=KJEDropperSpacer></div> </div> <div id=KJE-D-NEW_LOAN><div id=KJE-P-NEW_LOAN>Input information:</div></div> <div id=KJE-E-NEW_LOAN > <div id='KJE-C-INTEREST_RATE'><input id='KJE-INTEREST_RATE' /></div> <div id='KJE-C-TERM_IN_MONTHS'><input id='KJE-TERM_IN_MONTHS' /></div> <div id='KJE-C-UP_FRONT_COSTS'><input id='KJE-UP_FRONT_COSTS' /></div> <div id='KJE-C-RATE_EARNED_ON_SAVINGS'><input id='KJE-RATE_EARNED_ON_SAVINGS' /></div> <div id='KJE-C-POINTS'><input id='KJE-POINTS' /></div> <div id='KJE-C-INCOME_TAX_RATE'><input id='KJE-INCOME_TAX_RATE' /></div> <div id='KJE-C-LOAN_TYPE'>**LOAN_TYPE**</div> <div id='KJE-C-INCLUDE_CLOSING_COSTS_IN_LOAN'><input id='KJE-INCLUDE_CLOSING_COSTS_IN_LOAN' type=checkbox name='INCLUDE_CLOSING_COSTS_IN_LOAN' /></div> <div class=KJEDropperSpacer></div> </div> **GRAPH1** ";
+KJE.DefinitionText=" <div id='KJE-D-LOAN_AMOUNT_OWED' ><dt>Loan balance</dt><dd>Loan balance is the total remaining balance on a loan. If you are uncertain of your exact balance, enter an estimate that is as close as possible.</dd></div> <div id='KJE-D-LOAN_PAYMENT' ><dt>Loan payment</dt><dd>The payment amount is your current monthly payment.</dd></div> <div id='KJE-D-LOAN_MONTHS_LEFT' ><dt>Remaining payments</dt><dd>The number of months you have left to make payments on a loan. This is calculated from the interest rate, monthly payment and current balance of the loan.</dd></div> <div id='KJE-D-LOAN_RATE' ><dt>Loan interest rate</dt><dd>Annual interest rate for this loan. Interest is calculated monthly on the current outstanding balance of your loan at 1/12 of the annual rate.</dd></div> <div id='KJE-D-CC_BALANCE' ><dt>Credit card / credit line balance</dt><dd>The outstanding balance on your credit card. You do not need to include finance charges; they will be calculated based on your interest rate.</dd></div> <div id='KJE-D-CC_RATE' ><dt>Credit card / credit line rate</dt><dd>Annual interest rate you pay on outstanding credit card balances. This calculator assumes simple interest is charged every month at 1/12th of your annual rate.</dd></div> <div id='KJE-D-CC_PAYMENT' ><dt>Credit card payment</dt><dd>Credit card payments are based on your outstanding balance and annual interest rate. For this loan comparison, the monthly payment is the amount required to pay off your credit card in the same number of months as your consolidation loan. Your actual credit card payment may be lower, but will often require many more payments.</dd></div> <div id='KJE-D-INTEREST_RATE' ><dt>Interest rate</dt><dd>Annual interest rate for your new consolidation loan.</dd></div> <div id='KJE-D-TERM_IN_MONTHS' ><dt>Term in months</dt><dd>Number of months for your new consolidation loan.</dd></div> <div id='KJE-D-UP_FRONT_COSTS' ><dt>Up front costs</dt><dd>Any fees you are required to pay up front to receive this loan.</dd></div> <div id='KJE-D-RATE_EARNED_ON_SAVINGS' ><dt>Rate earned on savings</dt><dd>This is the rate of return you would expect to make on your closing costs, if you were to invest them. This could include appraisal fees, loan origination fees, etc.<p>**ROR_DEFINITION**</dd></div> <div id='KJE-D-INCLUDE_CLOSING_COSTS_IN_LOAN' ><dt>Include closing costs in loan</dt><dd>If you include your closing costs in your loan, your loan balance, monthly payment and total interest paid will increase. You will, however, be required to pay less money up front. Including your closing costs in your loan may be a good option if you do not have funds available, or you can achieve a relatively high rate of return on your savings.</dd></div> ";
+KJE.ReportText=' <!--HEADING "Business Debt Consolidation" HEADING--> <h2 class=\'KJEReportHeader KJEFontHeading\'>RESULTS_MESSAGE</h2> RESULTS_MESSAGE SAVINGS_MESSAGE **GRAPH** <div class=KJEReportTableDiv><table class=KJEReportTable> <caption class=\'KJEHeaderRow KJEHeading\'>Results Summary</caption> <thead class=\'KJEReportTHeader\'> <tr class=KJEHeaderRow><td class=KJEHeading>&nbsp;</td><th class=KJEHeading scope=\'col\'>Current loans</th><th class=KJEHeading scope=\'col\'>Consolidated Loan</th></tr> </thead> <tbody class=\'KJEReportTBody\'> <tr class=KJEOddRow><th class="KJELabel KJECellBorder KJECell60" scope=\'row\'>Balance </th><td class="KJECell KJECellBorder KJECell20">CURRENT_LOANS_BALANCE</td><td class="KJECell KJECell20">NEW_LOAN_AMOUNT</td></tr> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Total interest </th><td class="KJECell KJECellBorder">CURRENT_LOANS_TOTAL_INTEREST </td><td class="KJECell">NEW_LOAN_TOTAL_INTEREST </td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Closing costs + lost interest*</th><td class="KJECell KJECellBorder">$0</td><td class="KJECell">INTEREST_FROM_SAVINGS_ACCOUNT</td></tr> </tbody> <tfoot class=\'KJEReportTFooter\'> <tr class=KJEFooterRow><th class="KJELabel KJECellBorder" scope=\'row\'>Total payments </th><td class="KJECellStrong KJECellBorder">CURRENT_LOANS_TOTAL_PAYMENTS</td><td class="KJECellStrong">NEW_LOAN_NET_PAYMENTS</td></tr> </tfoot> </table> </div> <div class=KJEInset>*This amount is $0 if closing costs are included in the loan amount.</div> <div class=KJEReportTableDiv><table class=KJEReportTable><caption class=\'KJEHeaderRow KJEHeading\'>New Consolidation Loan</caption> <tbody class=\'KJEReportTBody\'> <tr class=KJEOddRow><th class="KJELabel KJECellBorder KJECell60" scope=\'row\'>Loan amount </th><td class="KJECell KJECell40">NEW_LOAN_AMOUNT </td></tr> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Monthly payment </th><td class="KJECell">NEW_LOAN_INITIAL_PAYMENT </td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Interest rate </th><td class="KJECell">INTEREST_RATE </td></tr> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Term in months </th><td class="KJECell">TERM_IN_MONTHS </td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Total closing costs </th><td class="KJECell">TOTAL_CLOSING_COSTS INCLUDE_CLOSING_COSTS_IN_LOAN</td></tr> </tbody> </table> </div> <h2 class=\'KJEReportHeader KJEFontHeading\'>Current Loans and Credit Cards</h2>The total of all current loan payments is CURRENT_LOANS_INITIAL_PAYMENT. This is based on the loans and payment information shown below. <div class=KJEReportTableDiv><table class=KJEReportTable><caption class=\'KJEHeaderRow KJEHeading\'>Current Loans</caption> <thead class=\'KJEReportTHeader\'> <tr class=KJEHeaderRow><td class="KJEHeading KJECell40">&nbsp;</td><th class="KJEHeading KJECell20" scope=\'col\'>Amount Owed</th><th class="KJEHeading KJECell20" scope=\'col\'>Monthly Payment</th><th class="KJEHeading KJECell20" scope=\'col\'>Payments Left</th></tr> </thead> <tbody class=\'KJEReportTBody\'> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Loan one</th><td class="KJECell KJECellBorder">AUTO_LOAN_AMOUNT_OWED </td><td class="KJECell KJECellBorder">AUTO_LOAN_PAYMENT</td><td class="KJECell">AUTO_LOAN_MONTHS_LEFT</td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Loan two</th><td class="KJECell KJECellBorder">AUTO_LOAN_2_AMOUNT_OWED </td><td class="KJECell KJECellBorder">AUTO_LOAN_2_PAYMENT</td><td class="KJECell">AUTO_LOAN_2_MONTHS_LEFT</td></tr> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Loan three</th><td class="KJECell KJECellBorder">EDUCATION_LOANS_AMOUNT_OWED </td><td class="KJECell KJECellBorder">EDUCATION_LOANS_PAYMENT</td><td class="KJECell">EDUCATION_LOANS_MONTHS_LEFT</td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Loan four</th><td class="KJECell KJECellBorder">BOAT_RV_LOANS_AMOUNT_OWED </td><td class="KJECell KJECellBorder">BOAT_RV_LOANS_PAYMENT</td><td class="KJECell">BOAT_RV_LOANS_MONTHS_LEFT</td></tr> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Other loans</th><td class="KJECell KJECellBorder">OTHER_LOANS_AMOUNT_OWED</td><td class="KJECell KJECellBorder">OTHER_LOANS_PAYMENT</td><td class="KJECell">OTHER_LOANS_MONTHS_LEFT</td></tr> </tbody> </table> </div> <div class=KJEReportTableDiv><table class=KJEReportTable><caption class=\'KJEHeaderRow KJEHeading\'>Credit Card / Credit Line Summary</caption> <thead class=\'KJEReportTHeader\'> <tr class=KJEHeaderRow><td class="KJEHeading KJECell40">&nbsp;</td><th class="KJEHeading KJECell20" scope=\'col\'>Amount Owed</th><th class="KJEHeading KJECell20" scope=\'col\'>Monthly Payment</th><th class="KJEHeading KJECell20" scope=\'col\'>Interest Rate</th></tr> </thead> <tbody class=\'KJEReportTBody\'> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Card / line 1</th><td class="KJECell KJECellBorder">CREDIT_CARD_1_AMOUNT</td><td class="KJECell KJECellBorder">CREDIT_CARD_1_PAYMENT</td><td class="KJECell">CREDIT_CARD_1_RATE</td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Card / line 2</th><td class="KJECell KJECellBorder">CREDIT_CARD_2_AMOUNT</td><td class="KJECell KJECellBorder">CREDIT_CARD_2_PAYMENT</td><td class="KJECell">CREDIT_CARD_2_RATE</td></tr> <tr class=KJEEvenRow><th class="KJELabel KJECellBorder" scope=\'row\'>Card / line 3</th><td class="KJECell KJECellBorder">CREDIT_CARD_3_AMOUNT</td><td class="KJECell KJECellBorder">CREDIT_CARD_3_PAYMENT</td><td class="KJECell">CREDIT_CARD_3_RATE</td></tr> <tr class=KJEOddRow><th class="KJELabel KJECellBorder" scope=\'row\'>Other account</th><td class="KJECell KJECellBorder">OTHER_ACCOUNT_AMOUNT </td><td class="KJECell KJECellBorder">OTHER_ACCOUNT_PAYMENT</td><td class="KJECell">OTHER_ACCOUNT_RATE</td></tr> </tbody> </table> </div> <h2 class=\'KJEScheduleHeader KJEFontHeading\'>New Loan Payment Schedule</h2> **REPEATING GROUP** ';
+KJE.parameters.set("BIZ_CALCULATOR",true);
+KJE.parameters.set("AUTO_LOAN_2_AMOUNT_OWED",0);
+KJE.parameters.set("AUTO_LOAN_2_MONTHS_LEFT",0);
+KJE.parameters.set("AUTO_LOAN_2_PAYMENT",0);
+KJE.parameters.set("AUTO_LOAN_AMOUNT_OWED",9500);
+KJE.parameters.set("AUTO_LOAN_MONTHS_LEFT",24);
+KJE.parameters.set("AUTO_LOAN_PAYMENT",430);
+KJE.parameters.set("BOAT_RV_LOANS_AMOUNT_OWED",0);
+KJE.parameters.set("BOAT_RV_LOANS_MONTHS_LEFT",0);
+KJE.parameters.set("BOAT_RV_LOANS_PAYMENT",0);
+KJE.parameters.set("CREDIT_CARD_1_AMOUNT",5000);
+KJE.parameters.set("CREDIT_CARD_1_RATE",15.9);
+KJE.parameters.set("CREDIT_CARD_2_AMOUNT",1200);
+KJE.parameters.set("CREDIT_CARD_2_RATE",19);
+KJE.parameters.set("CREDIT_CARD_3_AMOUNT",0);
+KJE.parameters.set("CREDIT_CARD_3_RATE",0);
+KJE.parameters.set("EDUCATION_LOANS_AMOUNT_OWED",0);
+KJE.parameters.set("EDUCATION_LOANS_MONTHS_LEFT",0);
+KJE.parameters.set("EDUCATION_LOANS_PAYMENT",0);
+KJE.parameters.set("INCLUDE_CLOSING_COSTS_IN_LOAN",0);
+KJE.parameters.set("INCOME_TAX_RATE",0);
+KJE.parameters.set("INTEREST_RATE",8);
+KJE.parameters.set("LOAN_TYPE","Personal");
+KJE.parameters.set("OTHER_ACCOUNT_AMOUNT",0);
+KJE.parameters.set("OTHER_ACCOUNT_RATE",0);
+KJE.parameters.set("OTHER_LOANS_AMOUNT_OWED",0);
+KJE.parameters.set("OTHER_LOANS_MONTHS_LEFT",0);
+KJE.parameters.set("OTHER_LOANS_PAYMENT",0);
+KJE.parameters.set("POINTS",0);
+KJE.parameters.set("RATE_EARNED_ON_SAVINGS",KJE.Default.RORSave);
+KJE.parameters.set("TERM_IN_MONTHS",24);
+KJE.parameters.set("UP_FRONT_COSTS",0);
